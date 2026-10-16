@@ -5,7 +5,7 @@ boot loads it, its segment 0 stays in memory while programs run, and every
 compiled program calls it for files, strings and the console.  This
 repository is a replacement for it written in C and compiled by
 [Tiny-C](https://github.com/Bio-Printer/UCSD-TinyC).  The two are
-interchangeable: copy this `SYSTEM.PASCAL` over the one on the boot disk and the
+interchangeable: boot `SYSTEM.C` (this one) instead of `SYSTEM.PASCAL` and the
 system runs as before, with the Filer, Editor, Compiler, Linker and Assembler,
 Pascal and Tiny-C programs, the Tiny-C shell, pexec and sub-volumes.
 
@@ -13,6 +13,17 @@ It is a port of the U134.4 OS source, revision 1.13 (UCSD-Pascal-Volumes'
 `U134.4_OS_SOURCE_v1.13`: II.0 plus pexec, `S(hell` and `X(ecute` into
 sub-volumes).  The text, the files it writes and the choices it makes are the
 Pascal one's.  It needs no newer emulator: any that runs that one runs this.
+
+BIGGY (UCSD-Pascal-Volumes' `Big_Disk.BLK`) holds both, and its SYSTEM.MICRO
+has a boot that chooses:
+
+    Type any key within 2 seconds to boot SYSTEM.PASCAL instead of SYSTEM.C: SYSTEM.C
+
+SYSTEM.C unless a key is typed (the key is not passed on); when the one chosen
+is not on the disk, the other.  The 2 seconds need emulator 2.08 (its key wait,
+`OUT (2)`); an older one does not wait.  The volume SYS-C: (UCSD-Pascal-Volumes'
+`BLK_format/SYS-C.BLK`) has the sources, SYSTEM.C, that SYSTEM.MICRO and the
+boot's source BOOTC.TEXT.
 
 ## Smaller
 
@@ -32,12 +43,13 @@ system's code saves does not show there; its frames and string constants
 
 ## Installing it
 
-* Copy `SYSTEM.PASCAL` onto the boot disk in place of the old one (the
-  emulator's Options > Import File, or the Filer: `T(ransfer` it to
-  `*SYSTEM.PASCAL` from another disk), then boot again.  Keep the old one: it
-  is the reference.
-* Or boot `Big_Disk_C.zip` (BIGGY, the Tiny-C boot disk of UCSD-TinyC, with
-  this SYSTEM.PASCAL).
+* Boot BIGGY: it has SYSTEM.C, SYSTEM.PASCAL and the choosing boot.
+* On another disk: copy `SYSTEM.C` and `SYSTEM.MICRO` onto it (the emulator's
+  Options > Import File, or the Filer's T(ransfer to `*SYSTEM.C` and
+  `*SYSTEM.MICRO`), keep its SYSTEM.PASCAL, and boot again.  Or copy `SYSTEM.C`
+  over its `SYSTEM.PASCAL` (the old boot then boots it, with no question).
+* Built on the P-System: X(ecute TINY-C:CC, `SYS-C:SYSC` makes SYS-C:SYSC.CODE,
+  the same as SYSTEM.C.
 
 ## What it keeps (what compiled programs depend on)
 
@@ -70,11 +82,14 @@ system's code saves does not show there; its frames and string constants
 
     python3 build.py
 
-compiles `src/system.c` with UCSD-TinyC's host compiler (`../ucsd-tinyc`, or
-`$TINYC`; it is built with gcc if needed) into `SYSTEM.PASCAL`, checks the
+compiles `src/sysc.c` with UCSD-TinyC's host compiler (`../ucsd-tinyc`, or
+`$TINYC`; it is built with gcc if needed) into `SYSTEM.C`, checks the
 numbers, the segments, the globals and EXECERROR's frame (the build fails
 without them), and compares the sizes with the Pascal SYSTEM.PASCAL (from
-`../UCSD-Pascal-Volumes`).  `tools/psbuild.py` builds it again on the
+`../UCSD-Pascal-Volumes`).  It also makes `SYSTEM.MICRO` (BIGGY's interpreter with
+the choosing boot, `tools/boot.py`; its bytes are checked against the emulator's
+copy when `../ucsd-pascal_windows_emulator` is there) and the volume
+`build/SYS-C.BLK`.  `tools/psbuild.py` builds it again on the
 P-System, with Tiny-C's CC running on this operating system: the code file is
 the same, byte for byte.
 
@@ -95,11 +110,14 @@ and `%`, no `>>`, no constant over 32767.
 
 | | |
 |---|---|
-| `src/system.c` | the module: the procedures' declarations (their numbers) and the segments |
+| `src/sysc.c` | the module: the procedures' declarations (their numbers) and the segments |
 | `src/globals.h` | the types (FIB, DIRENTRY, SYSCOMREC, ...), the global variables word for word, the CSPs |
 | `src/seg0.c` | segment 0: EXECERROR ... COMMAND in their order (SYSTEM.A, B and C.TEXT), the body (main), then this file's helpers |
 | `src/segs.c` | USERPROGRAM, DEBUGGER, PRINTERROR, INITIALIZE, GETCMD and their parts (SYSSEGS.A and B.TEXT) |
-| `build.py` | SYSTEM.PASCAL, checked |
+| `src/readme.txt` | SYS-C:README.TEXT |
+| `build.py` | SYSTEM.C, checked; SYSTEM.MICRO; build/SYS-C.BLK |
+| `tools/boot.py` | the choosing boot: assembled, put into SYSTEM.MICRO, its source BOOTC.TEXT |
+| `tools/boottest.py` | the boot in every mode and layout |
 | `tools/suite.py` | UCSD-TinyC's tests on this operating system |
 | `tools/systest.py` | the system programs on both operating systems: the same transcripts and disks |
 | `tools/psbuild.py` | the build on the P-System |
@@ -114,8 +132,9 @@ its variables through a record.
 
 * `tools/suite.py TEST ...`: UCSD-TinyC's tests (`quicktest`, `pexectest`,
   `keytest`, `xsubvoltest`, `selfcompile`, `alltest`, `shellalltest`, the vi
-  tests, ...) with this SYSTEM.PASCAL on their boot disks.  All 38 pass, in
-  P-Code and in Z80 mode.
+  tests, ...) with SYSTEM.C as the SYSTEM.PASCAL of their boot disks.  All 38 pass in P-Code
+  mode; in Z80 mode 34 have been run on this build and pass (alltest,
+  shellalltest, vipagetest and viscreentest are still to be run there).
 * `tools/systest.py`: the Filer (list, transfer, change, remove, krunch, the
   work file), the Compiler, a Pascal program's strings, files (text with blank
   compression, a typed file, a missing one), console input with the delete
@@ -126,6 +145,10 @@ its variables through a record.
   byte for byte (only the Compiler's free memory differs).  In P-Code mode
   (standard, Reclaim and Harvard layouts) and in Z80 mode.
 * `tools/psbuild.py`: built on the P-System, the same code file.
+* `tools/boottest.py`: the boot, in P-Code mode (standard, Reclaim, Harvard) and
+  Z80 mode: no key boots SYSTEM.C, a key SYSTEM.PASCAL, each when the other is
+  missing, the old SYSTEM.MICRO as before; and BOOTC.TEXT assembled by the
+  P-System's Assembler is the same code.
 
 ## Where it differs
 
@@ -138,3 +161,11 @@ Only where the Pascal one fails:
   "String overflow".
 * A new directory entry's word 2 holds only the file's kind (the Pascal one
   left whatever its local had in the bits after it).
+
+## Known limit
+
+* The Filer's K(runch) stops with "Please re-boot" when it has moved
+  SYSTEM.PASCAL on the boot disk -- by name, so not when it moves SYSTEM.C while
+  SYSTEM.C runs: then its segments are read from where the file was.  Boot again
+  after a Filer K(runch) of the boot disk (Tiny-C's KRUNCH finds the running
+  system by its blocks and is safe).

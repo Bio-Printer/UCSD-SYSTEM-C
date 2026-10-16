@@ -244,7 +244,7 @@ def files_of(img):
 def main(args):
     mode = os.environ.get('PSYS_MODE', 'native')
     names = args or list(SCENARIOS)
-    code = open(os.path.join(ROOT, 'SYSTEM.PASCAL'), 'rb').read()
+    code = open(os.path.join(ROOT, 'SYSTEM.C'), 'rb').read()
     bad = 0
     for name in names:
         res = {}

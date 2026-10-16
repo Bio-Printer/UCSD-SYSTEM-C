@@ -61,7 +61,7 @@ def main(args):
     os.makedirs(logs, exist_ok=True)
     saved = None
     if not pascal:
-        saved = install(open(os.path.join(ROOT, 'SYSTEM.PASCAL'), 'rb').read())
+        saved = install(open(os.path.join(ROOT, 'SYSTEM.C'), 'rb').read())
     bad = 0
     try:
         for t in tests:

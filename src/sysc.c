@@ -1,4 +1,4 @@
-/* system.c -- the UCSD Pascal II.0 operating system (SYSTEM.PASCAL) in C.
+/* sysc.c -- the UCSD Pascal II.0 operating system in C: SYSTEM.C (SYSTEM.PASCAL's twin).
  *
  * A replacement for the U134.4 OS (revision 1.13: GETCMD's pexec, the S(hell
  * and X(ecute into sub-volumes) that every program and code file of the
