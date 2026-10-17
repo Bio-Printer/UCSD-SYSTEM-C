@@ -118,6 +118,7 @@ and `%`, no `>>`, no constant over 32767.
 | `build.py` | SYSTEM.C, checked; SYSTEM.MICRO; build/SYS-C.BLK |
 | `tools/boot.py` | the choosing boot: assembled, put into SYSTEM.MICRO, its source BOOTC.TEXT |
 | `tools/boottest.py` | the boot in every mode and layout |
+| `tools/filer.py`, `tools/filertest.py` | SYSTEM.FILER whose K(runch) knows the running system; its test |
 | `tools/suite.py` | UCSD-TinyC's tests on this operating system |
 | `tools/systest.py` | the system programs on both operating systems: the same transcripts and disks |
 | `tools/psbuild.py` | the build on the P-System |
@@ -162,10 +163,17 @@ Only where the Pascal one fails:
 * A new directory entry's word 2 holds only the file's kind (the Pascal one
   left whatever its local had in the bits after it).
 
-## Known limit
+## The Filer's K(runch)
 
-* The Filer's K(runch) stops with "Please re-boot" when it has moved
-  SYSTEM.PASCAL on the boot disk -- by name, so not when it moves SYSTEM.C while
-  SYSTEM.C runs: then its segments are read from where the file was.  Boot again
-  after a Filer K(runch) of the boot disk (Tiny-C's KRUNCH finds the running
-  system by its blocks and is safe).
+The Filer's K(runch) stops with "Please re-boot" when it has moved the running
+system: the system reads its segments by their blocks, so they must not move
+under it.  BIGGY's Filer up to 1.27 looked for a file named SYSTEM.PASCAL, so
+it went on after moving SYSTEM.C while SYSTEM.C ran.  `tools/filer.py` builds
+revision 1.14 of the OS and Filer source (UCSD-Pascal-Volumes'
+`U134.4_OS_SOURCE_v1.14`: FILER.E.TEXT finds the running system by its segment
+0's unit and block, `SYSCOM^.SEGTABLE[0]`) and compiles its II.0.FILER on the
+P-System into `SYSTEM.FILER` (BIGGY 1.28).  Compiled the same way, v1.13 gives
+BIGGY's old SYSTEM.FILER byte for byte.  `tools/filertest.py` checks it:
+SYSTEM.C or SYSTEM.PASCAL running and moved (a reboot, after which the disk boots
+again), the other one moved or another disk krunched (no reboot), and the old
+Filer.
