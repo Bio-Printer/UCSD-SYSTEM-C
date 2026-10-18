@@ -133,9 +133,8 @@ its variables through a record.
 
 * `tools/suite.py TEST ...`: UCSD-TinyC's tests (`quicktest`, `pexectest`,
   `keytest`, `xsubvoltest`, `selfcompile`, `alltest`, `shellalltest`, the vi
-  tests, ...) with SYSTEM.C as the SYSTEM.PASCAL of their boot disks.  All 38 pass in P-Code
-  mode; in Z80 mode 34 have been run on this build and pass (alltest,
-  shellalltest, vipagetest and viscreentest are still to be run there).
+  tests, ...) with SYSTEM.C as the SYSTEM.PASCAL of their boot disks.  All 38 pass, in P-Code
+  and in Z80 mode.
 * `tools/systest.py`: the Filer (list, transfer, change, remove, krunch, the
   work file), the Compiler, a Pascal program's strings, files (text with blank
   compression, a typed file, a missing one), console input with the delete
