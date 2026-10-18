@@ -1,0 +1,6 @@
+; BUILD -- the operating system in C: SYS-C:SYSTEM.C, the same as the one on
+; BIGGY byte for byte.  CC @SYS-C:BUILD from the shell, or X(ecute TINY-C:CC and
+; answer @SYS-C:BUILD; CC @TINY-C:ALL runs it too.  SYSC.OBJ goes onto SYS-C:.
+-O SYS-C:
+-C SYSC
+-L SYS-C:SYSTEM.C.=SYSC

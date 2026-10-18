@@ -29,8 +29,8 @@ reference disk) with the choosing boot; when the emulator's source is beside
 this repository (../ucsd-pascal_windows_emulator), its copy of the boot
 (kChoosingBoot, the addresses) must be the same.
 
-SYS-C: holds the sources (SYSC.C, SEG0.C, SEGS.C, GLOBALS.H: X(ecute
-TINY-C:CC, SYS-C:SYSC makes SYSC.CODE, which is SYSTEM.C), SYSTEM.C,
+SYS-C: holds the sources (SYSC.C, SEG0.C, SEGS.C, GLOBALS.H) and BUILD.TEXT
+(CC @SYS-C:BUILD makes SYS-C:SYSTEM.C again; TINY-C:ALL runs it), SYSTEM.C,
 SYSTEM.MICRO, the boot's source BOOTC.TEXT, README.TEXT and FILES.TEXT.
 """
 import os, re, struct, subprocess, sys
@@ -206,7 +206,8 @@ def check_emulator():
 
 # SYS-C: name, source (in this repository), kind (2 code, 3 text), what
 FILES = [('README.TEXT', 'src/readme.txt', 3, 'what is on SYS-C:, how to build and install it'),
-         ('SYSC.C', 'src/sysc.c', 3, 'the operating system: the procedures\' numbers, the segments (CC SYS-C:SYSC)'),
+         ('BUILD.TEXT', 'src/build.txt', 3, 'CC @SYS-C:BUILD makes SYS-C:SYSTEM.C (TINY-C:ALL runs it too)'),
+         ('SYSC.C', 'src/sysc.c', 3, 'the operating system: the procedures\' numbers, the segments'),
          ('GLOBALS.H', 'src/globals.h', 3, 'its types and global variables, word for word as the Pascal one\'s'),
          ('SEG0.C', 'src/seg0.c', 3, 'segment 0: EXECERROR .. COMMAND, the outer block'),
          ('SEGS.C', 'src/segs.c', 3, 'USERPROG, DEBUGGER, PRINTERR, INITIALI, GETCMD'),

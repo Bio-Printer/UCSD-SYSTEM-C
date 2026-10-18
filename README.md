@@ -48,8 +48,9 @@ system's code saves does not show there; its frames and string constants
   Options > Import File, or the Filer's T(ransfer to `*SYSTEM.C` and
   `*SYSTEM.MICRO`), keep its SYSTEM.PASCAL, and boot again.  Or copy `SYSTEM.C`
   over its `SYSTEM.PASCAL` (the old boot then boots it, with no question).
-* Built on the P-System: X(ecute TINY-C:CC, `SYS-C:SYSC` makes SYS-C:SYSC.CODE,
-  the same as SYSTEM.C.
+* Built on the P-System: `CC @SYS-C:BUILD` (the batch file SYS-C:BUILD.TEXT)
+  makes SYS-C:SYSTEM.C, the same as this one byte for byte; `CC @TINY-C:ALL`
+  (the compiler, the library and the tools) runs it too.
 
 ## What it keeps (what compiled programs depend on)
 
@@ -114,7 +115,7 @@ and `%`, no `>>`, no constant over 32767.
 | `src/globals.h` | the types (FIB, DIRENTRY, SYSCOMREC, ...), the global variables word for word, the CSPs |
 | `src/seg0.c` | segment 0: EXECERROR ... COMMAND in their order (SYSTEM.A, B and C.TEXT), the body (main), then this file's helpers |
 | `src/segs.c` | USERPROGRAM, DEBUGGER, PRINTERROR, INITIALIZE, GETCMD and their parts (SYSSEGS.A and B.TEXT) |
-| `src/readme.txt` | SYS-C:README.TEXT |
+| `src/readme.txt`, `src/build.txt` | SYS-C:README.TEXT, SYS-C:BUILD.TEXT |
 | `build.py` | SYSTEM.C, checked; SYSTEM.MICRO; build/SYS-C.BLK |
 | `tools/boot.py` | the choosing boot: assembled, put into SYSTEM.MICRO, its source BOOTC.TEXT |
 | `tools/boottest.py` | the boot in every mode and layout |

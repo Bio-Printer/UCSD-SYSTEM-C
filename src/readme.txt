@@ -20,6 +20,7 @@ later; an older one does not wait, and boots SYSTEM.C.
 
 THE FILES
 
+  BUILD.TEXT    CC @SYS-C:BUILD makes SYSTEM.C (TINY-C:ALL runs it too)
   SYSC.C        the module: the procedures' numbers and the segments
   GLOBALS.H     the types and the global variables (their word offsets)
   SEG0.C        segment 0: EXECERROR .. COMMAND, the outer block
@@ -31,12 +32,15 @@ THE FILES
 
 BUILDING IT
 
-  X(ecute TINY-C:CC    Compile what file? SYS-C:SYSC
+  CC @SYS-C:BUILD      (from the shell; or X(ecute TINY-C:CC, @SYS-C:BUILD)
 
-makes SYS-C:SYSC.CODE, the same as SYSTEM.C byte for byte (#pragma system
-lays it out as SYSTEM.PASCAL is).  To use a new one, copy it with the Filer
-to *SYSTEM.C (T(ransfer SYS-C:SYSC.CODE, *SYSTEM.C) and boot again.  Keep
-SYSTEM.PASCAL: a key at the boot brings it back.
+compiles SYSC.C (SYSC.OBJ beside it) and links SYS-C:SYSTEM.C, the same as
+BIGGY's byte for byte (#pragma system lays it out as SYSTEM.PASCAL is; the
+dot in -L SYS-C:SYSTEM.C.= makes that the name exactly).  CC @TINY-C:ALL,
+which rebuilds the compiler, the library and the tools, builds it too.  To
+use a new one, copy it with the Filer to *SYSTEM.C (T(ransfer
+SYS-C:SYSTEM.C, *SYSTEM.C) and boot again.  Keep SYSTEM.PASCAL: a key at the
+boot brings it back.
 
 On the host: https://github.com/Bio-Printer/UCSD-SYSTEM-C (build.py, and the
 tests that run both systems and compare them).
