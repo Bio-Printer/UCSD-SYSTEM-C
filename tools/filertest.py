@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.join(TINYC, 'tools'))
 import ucsdvol
 
 BIGGY = os.path.join(VOLUMES, 'BLK_format', 'Big_Disk.BLK')
+OLD_FILER = os.path.join(TINYC, 'build', 'img', 'Big_Disk.BLK')    # the reference disk: v1.13's Filer
 KRUNCH = 'TYPE "F"\nWAIT "Filer:"\nTYPE "K"\nWAIT "?"\nTYPE "%s\\r"\nWAIT "(Y/N)"\nTYPE "Y"\n'
 
 
@@ -40,6 +41,7 @@ def compact(src, dst):
 def main():
     d = tempfile.mkdtemp(prefix='filertest_')
     filer = open(os.path.join(ROOT, 'SYSTEM.FILER'), 'rb').read()
+    old_filer = ucsdvol.Volume(OLD_FILER).read('SYSTEM.FILER')[0]
 
     def disk(name, gap_before, new_filer=True):
         dd = os.path.join(d, name)
@@ -48,8 +50,7 @@ def main():
         path = os.path.join(dd, 'Big_Disk.BLK')
         compact(BIGGY, path)                             # no gap but the one made here
         v = ucsdvol.Volume(path)
-        if new_filer:
-            v.write('SYSTEM.FILER', filer, 2)
+        v.write('SYSTEM.FILER', filer if new_filer else old_filer, 2)
         es = sorted(v.entries, key=lambda e: e[0])
         names = [e[3] for e in es]
         v.remove(es[names.index(gap_before) - 1][3])      # a gap before it: K(runch moves it
