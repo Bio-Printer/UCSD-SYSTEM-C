@@ -11,7 +11,9 @@ Pascal and Tiny-C programs, the Tiny-C shell, pexec and sub-volumes.
 
 It is a port of the U134.4 OS source, revision 1.13 (UCSD-Pascal-Volumes'
 `U134.4_OS_SOURCE_v1.13`: II.0 plus pexec, `S(hell` and `X(ecute` into
-sub-volumes).  The text, the files it writes and the choices it makes are the
+sub-volumes), with revision 1.15's change: SCANTITLE makes a new file named
+NAME.BAS (a BASIC source, UCSD-BASIC) a text file, as NAME.TEXT
+(`tools/ospascal.py` makes that revision and its SYSTEM.PASCAL, BIGGY 1.29's).  The text, the files it writes and the choices it makes are the
 Pascal one's.  It needs no newer emulator: any that runs that one runs this.
 
 BIGGY (UCSD-Pascal-Volumes' `Big_Disk.BLK`) holds both, and its SYSTEM.MICRO
@@ -29,13 +31,17 @@ boot's source BOOTC.TEXT.
 
 | | Pascal | C |
 |---|---:|---:|
-| segment 0 (in memory all the time) | 7,756 bytes | **7,564 bytes** |
+| segment 0 (in memory all the time) | 7,794 bytes | **7,620 bytes** |
 | the outer block's data (the globals) | 550 bytes | 550 bytes |
 | PRINTERR, INITIALI, GETCMD (read in while they run) | 1,052 + 2,400 + 3,882 | 978 + 2,228 + 3,676 |
-| free memory of a program (`memfree`), standard layout and Z80 mode | 21,961 words | **22,057 words** (+96) |
-| ... P-Code mode, interpreter memory given back (Reclaim) | 25,876 words | **25,972 words** (+96) |
-| ... Reclaim and code in its own I-space (Harvard) | 31,749 words | **31,753 words** (+4) |
-| the Pascal Compiler's "[ N words]" compiling a program | 7,057 | **7,153** (+96) |
+| free memory of a program (`memfree`), standard layout and Z80 mode | 21,942 words | **22,029 words** (+87) |
+| ... P-Code mode, interpreter memory given back (Reclaim) | 25,857 words | **25,944 words** (+87) |
+| ... Reclaim and code in its own I-space (Harvard) | 31,746 words | **31,753 words** (+7) |
+| the Pascal Compiler's "[ N words]" compiling a program | 7,038 | **7,125** (+87) |
+
+(Both with the .BAS rule of 1.15: segment 0 grew by 38 bytes in Pascal, 56 in C, so
+a program has 19 and 28 words less than before; in the Harvard layout 3 and 0, the
+Pascal one's '.BAS' constant being in data memory.)
 
 In the Harvard layout code does not take data memory, so what the operating
 system's code saves does not show there; its frames and string constants
@@ -120,6 +126,7 @@ and `%`, no `>>`, no constant over 32767.
 | `tools/boot.py` | the choosing boot: assembled, put into SYSTEM.MICRO, its source BOOTC.TEXT |
 | `tools/boottest.py` | the boot in every mode and layout |
 | `tools/filer.py`, `tools/filertest.py` | SYSTEM.FILER whose K(runch) knows the running system; its test |
+| `tools/ospascal.py` | the OS source revision 1.15 (a new NAME.BAS is text) and SYSTEM.PASCAL compiled from it on the P-System |
 | `tools/suite.py` | UCSD-TinyC's tests on this operating system |
 | `tools/systest.py` | the system programs on both operating systems: the same transcripts and disks |
 | `tools/psbuild.py` | the build on the P-System |
@@ -137,14 +144,18 @@ its variables through a record.
   tests, ...) with SYSTEM.C as the SYSTEM.PASCAL of their boot disks.  All 38 pass, in P-Code
   and in Z80 mode.
 * `tools/systest.py`: the Filer (list, transfer, change, remove, krunch, the
-  work file), the Compiler, a Pascal program's strings, files (text with blank
+  work file), a new NAME.BAS (a text file), the Compiler, a Pascal program's strings, files (text with blank
   compression, a typed file, a missing one), console input with the delete
   keys, GOTOXY, an execution error, an I/O error, a stack overflow, the Editor,
   the Linker, the Assembler, SYSTEM.STARTUP, the shell, X(ecute, I(nitialize
   and H(alt -- each run on the Pascal operating system and on this one, from the
   same disks: the console transcripts and the disks they leave are the same,
   byte for byte (only the Compiler's free memory differs).  In P-Code mode
-  (standard, Reclaim and Harvard layouts) and in Z80 mode.
+  (standard, Reclaim and Harvard layouts) and in Z80 mode.  The Pascal one is
+  BIGGY's SYSTEM.PASCAL, or the file `SYSTEST_PASCAL` names (`SYSTEM.PASCAL`
+  here, 1.15).  The boot disk under test has no SYSTEM.C: BIGGY's boot (1.27)
+  would boot that one, not the SYSTEM.PASCAL being tested (the same for
+  `suite.py`'s disks).
 * `tools/psbuild.py`: built on the P-System, the same code file.
 * `tools/boottest.py`: the boot, in P-Code mode (standard, Reclaim, Harvard) and
   Z80 mode: no key boots SYSTEM.C, a key SYSTEM.PASCAL, each when the other is

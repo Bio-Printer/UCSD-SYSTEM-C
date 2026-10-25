@@ -40,8 +40,9 @@ def restore(saved=None):
 
 
 def install(code):
-    """SYSTEM.PASCAL := code on the boot disks (a copy of each kept in build/suite until
-    restore); their old bytes"""
+    """SYSTEM.PASCAL := code on the boot disks (None: theirs), and no SYSTEM.C there -- BIGGY's
+    boot (1.27) would boot that one instead (a copy of each kept in build/suite until restore);
+    their old bytes"""
     restore()
     os.makedirs(BACKUP, exist_ok=True)
     saved = {}
@@ -49,7 +50,9 @@ def install(code):
         saved[d] = open(d, 'rb').read()
         shutil.copy(d, backup_of(d))
         v = ucsdvol.Volume(d)
-        v.write('SYSTEM.PASCAL', code, 2)
+        if code:
+            v.write('SYSTEM.PASCAL', code, 2)
+        v.remove('SYSTEM.C')
         v.save()
     return saved
 
@@ -59,9 +62,7 @@ def main(args):
     tests = [a for a in args if not a.startswith('--')]
     logs = os.path.join(ROOT, 'build', 'suite')
     os.makedirs(logs, exist_ok=True)
-    saved = None
-    if not pascal:
-        saved = install(open(os.path.join(ROOT, 'SYSTEM.C'), 'rb').read())
+    saved = install(None if pascal else open(os.path.join(ROOT, 'SYSTEM.C'), 'rb').read())
     bad = 0
     try:
         for t in tests:

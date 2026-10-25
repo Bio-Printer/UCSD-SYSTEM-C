@@ -1,12 +1,13 @@
 SYS-C:  THE OPERATING SYSTEM IN C
 
 SYSTEM.C is the UCSD Pascal II.0 operating system written in C: a port of
-U134.4_OS_SOURCE_v1.13, the source of BIGGY's SYSTEM.PASCAL.  Programs and
+U134.4_OS_SOURCE_v1.13 with v1.15's change (a new NAME.BAS, a BASIC
+source, is a text file), the source of BIGGY's SYSTEM.PASCAL.  Programs and
 the system programs (Filer, Editor, Compiler, Linker, Assembler, the Tiny-C
 shell) cannot tell the two apart: segment 0 has the same procedures with the
 same numbers, the global variables are at the same words, the segments are
-the same.  Its segment 0, which stays in memory, is 192 bytes smaller, so a
-program has 96 words more.
+the same.  Its segment 0, which stays in memory, is 174 bytes smaller, so a
+program has 87 words more.
 
 BOOTING
 

@@ -7,7 +7,8 @@ byte for byte (what differs is printed).
   systest.py [SCENARIO ...]        (none: all of them)
 
 The boot disk is UCSD-Pascal-Volumes' BLK_format/Big_Disk.BLK (BIGGY, as
-published), with this repository's SYSTEM.PASCAL for the C one; unit #5 is
+published; SYSTEST_PASCAL=FILE: that SYSTEM.PASCAL instead, e.g. build/SYSTEM.PASCAL of
+tools/ospascal.py), with this repository's SYSTEM.C as SYSTEM.PASCAL for the C one; unit #5 is
 WORK: with a few Pascal programs, #9 an empty SPARE:.  PSYS_MODE (native or
 z80) as the other tests; SYSTEST_LAYOUT=reclaim or harvard: the native engine's
 layouts with the interpreter's memory given back (VERIFY_RECLAIM), and code in an
@@ -18,7 +19,7 @@ import os, re, shutil, struct, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
-VOLUMES = os.path.join(os.path.dirname(ROOT), 'UCSD-Pascal-Volumes')
+VOLUMES = os.environ.get('VOLUMES', os.path.join(os.path.dirname(ROOT), 'UCSD-Pascal-Volumes'))
 sys.path.insert(0, os.path.join(TINYC, 'tools'))
 import ucsdvol
 
@@ -96,6 +97,18 @@ BEGIN
   WRITE('name? '); READLN(S); WRITELN('got ', S, '!')
 END.
 """
+BASFILE = """PROGRAM BASFILE;
+VAR F: TEXT; S: STRING;
+BEGIN
+  REWRITE(F, '#9:PROG.BAS');
+  WRITELN(F, '10 PRINT "HELLO"');
+  WRITELN(F, '        20 END');
+  CLOSE(F, LOCK);
+  RESET(F, '#9:PROG.BAS');
+  WHILE NOT EOF(F) DO BEGIN READLN(F, S); WRITELN('[', S, ']') END;
+  CLOSE(F)
+END.
+"""
 
 C = 'TYPE "C"\nWAIT "Compile what text?"\n'
 
@@ -150,6 +163,11 @@ SCENARIOS = {
     # S(hell: the Tiny-C shell (pexec, the OS's files from C)
     'shell': ('TYPE "S"\nWAIT "> "\nTYPE "dir #5:\\r"\nWAIT "> "\nTYPE "type #5:hello.text\\r"\nWAIT "> "\n'
               'TYPE "copy #5:hello.text #9:\\r"\nWAIT "> "\nTYPE "bye\\r"\nWAIT "Command:"\n'),
+    # a new NAME.BAS is a text file (1.15): written by a Pascal program and read back; the
+    # Filer's T(ransfer to one; E(xtended list shows their kind
+    'basfile': (compile_steps('BASFILE') + x('#5:BASFILE') +
+                'TYPE "F"\nWAIT "Filer:"\nTYPE "T"\nWAIT "?"\nTYPE "#5:HELLO.TEXT\\r"\nWAIT "?"\nTYPE "#9:HELLO.BAS\\r"\nWAIT "Filer:"\n'
+                'TYPE "E"\nWAIT "?"\nTYPE "#9:\\r"\nWAIT "Filer:"\nTYPE "Q"\nWAIT "Command:"\n'),
     # X(ecute of no file, of a text file; I(nitialize; H(alt
     'execute': (x('#5:NOSUCH') + x('#5:HELLO.TEXT.') + 'TYPE "?"\nWAIT "S(hell"\nTYPE "I"\nWAIT "Command:"\n'
                 'TYPE "?"\nWAIT "S(hell"\nTYPE "H"\n'),
@@ -174,6 +192,8 @@ def disks(d, code, name):
     v = ucsdvol.Volume(boot)
     if code:
         v.write('SYSTEM.PASCAL', code, 2)
+    # (BIGGY's boot would boot its SYSTEM.C, whatever SYSTEM.PASCAL is: the one under test only)
+    v.remove('SYSTEM.C')
     if name == 'startup':                       # (a Tiny-C program as SYSTEM.STARTUP)
         from tcrun import compile_c
         open(os.path.join(d, 'st.c'), 'w').write(STARTUP)
@@ -183,7 +203,7 @@ def disks(d, code, name):
     ucsdvol.main(['new', os.path.join(d, 'WORK.BLK'), 'WORK', '1000'])
     ucsdvol.main(['new', os.path.join(d, 'SPARE.BLK'), 'SPARE', '400'])
     v = ucsdvol.Volume(os.path.join(d, 'WORK.BLK'))
-    for name, text in (('HELLO.TEXT', HELLO), ('CRASH.TEXT', CRASH), ('FILES.TEXT', FILES),
+    for name, text in (('HELLO.TEXT', HELLO), ('CRASH.TEXT', CRASH), ('FILES.TEXT', FILES), ('BASFILE.TEXT', BASFILE),
                        ('DEEP.TEXT', DEEP), ('IOERR.TEXT', IOERR), ('KEYS.TEXT', KEYS)):
         v.write(name, ucsdvol.text_to_ucsd(text), 3)
     v.save()
@@ -248,7 +268,8 @@ def main(args):
     bad = 0
     for name in names:
         res = {}
-        for which, c in (('Pascal', None), ('C', code)):
+        pas = open(os.environ['SYSTEST_PASCAL'], 'rb').read() if os.environ.get('SYSTEST_PASCAL') else None
+        for which, c in (('Pascal', pas), ('C', code)):
             d = tempfile.mkdtemp(prefix='systest_')
             disks(d, c, name)
             res[which] = run(d, SCENARIOS[name], mode)

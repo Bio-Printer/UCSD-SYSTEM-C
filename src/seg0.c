@@ -1072,6 +1072,11 @@ int scantitle(unsigned char *ftitlep, unsigned char *fvid, unsigned char *ftid,
             }
         }
     }
+    if (ok && ftid[0] > 4) {                    /* a BASIC source is text (1.15) */
+        i = ftid[0] - 3;
+        if (ftid[i] == '.' && ftid[i + 1] == 'B' && ftid[i + 2] == 'A' && ftid[i + 3] == 'S')
+            *fkind = TEXTFILE;
+    }
     return ok;
 }
 
