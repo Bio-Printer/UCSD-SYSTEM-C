@@ -2,12 +2,24 @@ SYS-C:  THE OPERATING SYSTEM IN C
 
 SYSTEM.C is the UCSD Pascal II.0 operating system written in C: a port of
 U134.4_OS_SOURCE_v1.13 with v1.15's change (a new NAME.BAS, a BASIC
-source, is a text file), the source of BIGGY's SYSTEM.PASCAL.  Programs and
+source, is a text file) and v1.16's (a file's entry gets the time of day it
+was written, from emulator 2.13: see TIMES below), the source of BIGGY's
+SYSTEM.PASCAL.  Programs and
 the system programs (Filer, Editor, Compiler, Linker, Assembler, the Tiny-C
 shell) cannot tell the two apart: segment 0 has the same procedures with the
 same numbers, the global variables are at the same words, the segments are
-the same.  Its segment 0, which stays in memory, is 174 bytes smaller, so a
-program has 87 words more.
+the same.  Its segment 0, which stays in memory, is 142 bytes smaller, so a
+program has 71 words more.
+
+TIMES
+
+FCLOSE (SEG0.C) gives a file it writes the time of day with its date:
+seconds since midnight + 1, its low 11 bits in DFKIND's bits 4..14 and its
+high 6 in DLASTBYTE's bits 10..15 (DLASTBYTE is the low 10: LASTBYTE in
+GLOBALS.H).  The emulator gives the time through TIME (both variables 25611)
+and today's date (both 25612), which THEDATE follows.  Do not boot an older
+SYSTEM.C (BIGGY 1.27 to 1.33) with disks written by this one: it takes an
+entry with a time for a bad one and removes it.
 
 BOOTING
 

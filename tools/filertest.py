@@ -34,7 +34,7 @@ def compact(src, dst):
     new.data[0:1024] = old.data[0:1024]
     for first, last, kind, name, lastbyte, date in sorted(old.entries, key=lambda e: e[0]):
         if not new.find(name):                           # (BIGGY's second SYSTEM.LIST is a stale entry)
-            new.write(name, bytes(old.data[first * 512: (last - 1) * 512 + lastbyte]), kind, date)
+            new.write(name, bytes(old.data[first * 512: (last - 1) * 512 + (lastbyte & 1023)]), kind, date)
     open(dst, 'wb').write(new.image())
 
 

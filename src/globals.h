@@ -92,7 +92,7 @@
 
 /* DIRENTRY, 13 words.  Word 2: DFKIND in bits 0..3, then FILLER1 (entry 0) or
    FILLER2 and STATUS (a file).  A file: DTID (STRING[15]) at byte 6,
-   DLASTBYTE word 11, DACCESS word 12 (a DATEREC: MONTH bits 0..3, DAY 4..8,
+   DLASTBYTE word 11 (bits 0..9; see LASTBYTE), DACCESS word 12 (a DATEREC: MONTH bits 0..3, DAY 4..8,
    YEAR 9..15; YEAR 100 marks a temporary entry).  Entry 0, the volume: DVID
    (STRING[7]) at byte 6, then DEOVBLK, DNUMFILES, DLOADTIME and DLASTBOOT,
    words 7..10 (the D_ macros). */
@@ -105,6 +105,15 @@ struct direntry {
     int daccess;
 };
 #define DKIND(e)      ((e)->dfkind & 15)
+/* DLASTBYTE is its low 10 bits (1..512, a PACKED field in the Pascal OS); its bits
+   10..15 and DFKIND's bits 4..14 hold the time of day the file was written (1.16):
+   seconds since midnight + 1 (1..86400, 0: none), the high 6 bits and the low 11 */
+#define LASTBYTE(e)   ((e)->dlastbyte & 1023)
+#define SETLASTBYTE(e, n) ((e)->dlastbyte = ((e)->dlastbyte & -1024) | (n))
+#define ETIMELO(e)    ((e)->dfkind & 0x7FF0)        /* the time's low 11 bits, in place */
+#define ETIMEHI(e)    ((e)->dlastbyte & -1024)      /* its high 6 bits, in place */
+#define PX_TIME_STAMP 25611             /* TIME(hi, lo) with both so: the time's two parts (emulator 2.13) */
+#define PX_TIME_DATE  25612             /* TIME(hi, lo) with both so: today's DATEREC in hi */
 #define D_EOVBLK(d)   (((int *)(d))[7])
 #define D_NUMFILES(d) (((int *)(d))[8])
 #define D_LOADTIME(d) (((int *)(d))[9])

@@ -181,7 +181,7 @@ void fopen(struct fib *f, unsigned char *ftitle, int fopenold, int junk)
             f->fnxtbyte = FBLKSIZE;
             f->fbufchngd = 0;
             if (fopenold)
-                f->fmaxbyte = h->dlastbyte;
+                f->fmaxbyte = LASTBYTE(h);
             else
                 f->fmaxbyte = FBLKSIZE;
             if (DKIND(h) == TEXTFILE) {
@@ -222,6 +222,8 @@ void fclose(struct fib *f, int ftype)
     int linx;
     int dupinx;
     int found;
+    int tlo, thi;                       /* the time the entry gets, in place (1.16) */
+    int nlo, nhi;                       /* now's */
     syscom->iorslt = INOERROR;
     if (!f->fisopen || f->fwindow == systerm->fwindow)
         return;
@@ -263,17 +265,36 @@ void fclose(struct fib *f, int ftype)
                         linx--;
                 }
                 e = &ldir[linx];
+                /* (1.16) today and the time of day from the PC (emulator 2.13: TIME's
+                   answers; 0 when its clock is off): the date follows it past midnight */
+                tlo = thi = PX_TIME_DATE;
+                TIME(&tlo, &thi);
+                if (tlo != 0)
+                    thedate = tlo;
+                nlo = nhi = PX_TIME_STAMP;
+                TIME(&nlo, &nhi);
+                tlo = 0;                        /* the time: none in the Filer's special case */
+                thi = 0;
                 if (ISTEMP(e->daccess)) {
-                    if (ISTEMP(h->daccess))
+                    if (ISTEMP(h->daccess)) {
                         h->daccess = thedate;   /* (else the Filer's special case) */
-                } else if (f->fmodified && (thedate & 15) != 0)
+                        tlo = (nlo & 2047) * 16;
+                        thi = (nhi & 63) * 1024;
+                    }
+                } else if (f->fmodified && (thedate & 15) != 0) {
                     h->daccess = thedate;
-                else
-                    h->daccess = e->daccess;
+                    tlo = (nlo & 2047) * 16;
+                    thi = (nhi & 63) * 1024;
+                } else {
+                    h->daccess = e->daccess;    /* not changed: its date and time stay */
+                    tlo = ETIMELO(e);
+                    thi = ETIMEHI(e);
+                }
                 h->dlastblk = h->dfirstblk + f->fmaxblk;
                 if (f->fsoftbuf)
-                    h->dlastbyte = f->fmaxbyte;
-                h->dfkind = h->dfkind & 15;     /* FILLER1 := 0 */
+                    SETLASTBYTE(h, f->fmaxbyte);
+                h->dfkind = (h->dfkind & 15) | tlo;     /* FILLER1 := 0, then the time */
+                h->dlastbyte = LASTBYTE(h) | thi;
                 f->fmodified = 0;
                 *e = *h;
             }
@@ -314,7 +335,7 @@ void fget(struct fib *f)
             if (f->fnxtblk == f->fmaxblk) {
                 if (f->fnxtbyte + leftoget > f->fmaxbyte)
                     goto eof;
-                leftinbuf = h->dlastbyte - f->fnxtbyte;
+                leftinbuf = LASTBYTE(h) - f->fnxtbyte;
             } else
                 leftinbuf = FBLKSIZE - f->fnxtbyte;
             amount = leftoget;
@@ -402,14 +423,14 @@ void fput(struct fib *f)
         wininx = 0;
         for (;;) {
             if (h->dfirstblk + f->fnxtblk == h->dlastblk) {
-                if (f->fnxtbyte + leftoput > h->dlastbyte) {
+                if (f->fnxtbyte + leftoput > LASTBYTE(h)) {
                     if (cantstretch(f)) {
                         syscom->iorslt = INOROOM;
                         goto eof;
                     }
                     leftinbuf = FBLKSIZE - f->fnxtbyte;
                 } else
-                    leftinbuf = h->dlastbyte - f->fnxtbyte;
+                    leftinbuf = LASTBYTE(h) - f->fnxtbyte;
             } else
                 leftinbuf = FBLKSIZE - f->fnxtbyte;
             amount = leftoput;
@@ -1202,7 +1223,7 @@ int fetchdir(int funit)
                 while (linx <= D_NUMFILES(g)) {
                     e = &g[linx];
                     if (e->dtid[0] == 0 || e->dtid[0] > TIDLENG || e->dlastblk < e->dfirstblk ||
-                        e->dlastbyte > FBLKSIZE || e->dlastbyte <= 0 || (unsigned)e->daccess >= (unsigned)YEAR100) {
+                        LASTBYTE(e) > FBLKSIZE || LASTBYTE(e) <= 0 || (unsigned)e->daccess >= (unsigned)YEAR100) {
                         ok = 0;
                         delentry(linx, g);
                     } else
@@ -1394,10 +1415,10 @@ int cantstretch(struct fib *f)
             lavailblk = D_EOVBLK(ldir);
         else
             lavailblk = ldir[linx].dfirstblk;
-        if (h->dlastblk < lavailblk || h->dlastbyte < FBLKSIZE) {
+        if (h->dlastblk < lavailblk || LASTBYTE(h) < FBLKSIZE) {
             e = &ldir[linx - 1];
             e->dlastblk = lavailblk;
-            e->dlastbyte = FBLKSIZE;
+            SETLASTBYTE(e, FBLKSIZE);
             writedir(f->funit, ldir);
             if (IORESULT() != INOERROR)
                 goto out;
@@ -1406,7 +1427,7 @@ int cantstretch(struct fib *f)
             if (f->fstate != FJANDW)
                 f->fstate = FNEEDCHAR;
             h->dlastblk = lavailblk;
-            h->dlastbyte = FBLKSIZE;
+            SETLASTBYTE(h, FBLKSIZE);
             h->daccess = (h->daccess & 0x1FF) | YEAR100;
             r = 0;
         }
