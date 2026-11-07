@@ -33,7 +33,7 @@ later; an older one does not wait, and boots SYSTEM.C.
 
 THE FILES
 
-  BUILD.TEXT    CC @SYS-C:BUILD makes SYSTEM.C (TINY-C:ALL runs it too)
+  MAKEFILE.TEXT MAKE -f SYS-C:MAKEFILE makes SYSTEM.C (TINY-C:MAKEFILE too)
   SYSC.C        the module: the procedures' numbers and the segments
   GLOBALS.H     the types and the global variables (their word offsets)
   SEG0.C        segment 0: EXECERROR .. COMMAND, the outer block
@@ -45,12 +45,14 @@ THE FILES
 
 BUILDING IT
 
-  CC @SYS-C:BUILD      (from the shell; or X(ecute TINY-C:CC, @SYS-C:BUILD)
+  MAKE -f SYS-C:MAKEFILE    (from the shell; TINY-C: and TOOLS: on line)
 
-compiles SYSC.C (SYSC.OBJ beside it) and links SYS-C:SYSTEM.C, the same as
-BIGGY's byte for byte (#pragma system lays it out as SYSTEM.PASCAL is; the
-dot in -L SYS-C:SYSTEM.C.= makes that the name exactly).  CC @TINY-C:ALL,
-which rebuilds the compiler, the library and the tools, builds it too.  To
+compiles SYSC.C when it or one of the files it includes is newer than
+SYSC.OBJ (beside it) and links SYS-C:SYSTEM.C, the same as BIGGY's byte for
+byte (#pragma system lays it out as SYSTEM.PASCAL is; the dot in -L
+SYS-C:SYSTEM.C.= makes that the name exactly); MAKE -B -f SYS-C:MAKEFILE
+does both again.  MAKE -f TINY-C:MAKEFILE, which rebuilds the compiler, the
+library and the tools, builds it too.  To
 use a new one, copy it with the Filer to *SYSTEM.C (T(ransfer
 SYS-C:SYSTEM.C, *SYSTEM.C) and boot again.  Keep SYSTEM.PASCAL: a key at the
 boot brings it back.
