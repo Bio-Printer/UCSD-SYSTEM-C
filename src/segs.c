@@ -409,7 +409,7 @@ void initcharset(struct ini *v)
 #pragma segment GETCMD
 
 #define ASSEMONLY LINKANDGO
-#define PXRUN   25601                   /* pexec (Tiny-C): SYSCOM^.EXPANSION[0] */
+#define PXRUN   25601                   /* pexec (UCSD-C): SYSCOM^.EXPANSION[0] */
 #define PXCHILD 25602
 #define PXBACK  25603
 #define FOUND_OK  0                     /* ASSOCIATE's status */
@@ -519,7 +519,7 @@ void getcmd(void)
                 return;
             }
             break;
-        case 'S':                               /* the Tiny-C shell (pexec) */
+        case 'S':                               /* the UCSD-C shell (pexec) */
             wln();
             pset(t, "*SYSTEM.SHELL");
             if (associate(t, 0, 0, 1, &dont_care)) {
@@ -866,7 +866,7 @@ void execute(void)
     }
 }
 
-/* SUBEXEC: TITLE a path into sub-volumes (Tiny-C's MKDIR: a data file whose
+/* SUBEXEC: TITLE a path into sub-volumes (UCSD-C's MKDIR: a data file whose
    blocks 2..5 hold a directory): VOL:A/B/NAME, VOL:/A/NAME or A/NAME, a \ as
    a /.  The code file runs where it is: LOADSEGS with its block on the disk,
    as pexec does */

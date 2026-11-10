@@ -17,13 +17,13 @@ In P-Code mode, and the first case in Z80 mode too.
 import os, re, shutil, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
+UCSDC = os.environ.get('UCSDC', os.path.join(os.path.dirname(ROOT), 'ucsd-c'))
 VOLUMES = os.environ.get('VOLUMES', os.path.join(os.path.dirname(ROOT), 'UCSD-Pascal-Volumes'))
-sys.path.insert(0, os.path.join(TINYC, 'tools'))
+sys.path.insert(0, os.path.join(UCSDC, 'tools'))
 import ucsdvol
 
 BIGGY = os.path.join(VOLUMES, 'BLK_format', 'Big_Disk.BLK')
-OLD_FILER = os.path.join(TINYC, 'build', 'img', 'Big_Disk.BLK')    # the reference disk: v1.13's Filer
+OLD_FILER = os.path.join(UCSDC, 'build', 'img', 'Big_Disk.BLK')    # the reference disk: v1.13's Filer
 KRUNCH = 'TYPE "F"\nWAIT "Filer:"\nTYPE "K"\nWAIT "?"\nTYPE "%s\\r"\nWAIT "(Y/N)"\nTYPE "Y"\n'
 
 
@@ -46,7 +46,7 @@ def main():
     def disk(name, gap_before, new_filer=True):
         dd = os.path.join(d, name)
         os.makedirs(dd)
-        shutil.copy(os.path.join(TINYC, 'build', 'data', 'pascal.bin'), dd)
+        shutil.copy(os.path.join(UCSDC, 'build', 'data', 'pascal.bin'), dd)
         path = os.path.join(dd, 'Big_Disk.BLK')
         compact(BIGGY, path)                             # no gap but the one made here
         v = ucsdvol.Volume(path)
@@ -71,7 +71,7 @@ def main():
         sc = os.path.join(d, 'run%d.script' % n[0])
         out = os.path.join(d, 'out%d' % n[0])
         open(sc, 'w').write(script)
-        r = subprocess.run([os.path.join(TINYC, 'build', 'run_verify'), data, os.path.join(d, 'W.BLK'), os.path.join(d, 'S.BLK'),
+        r = subprocess.run([os.path.join(UCSDC, 'build', 'run_verify'), data, os.path.join(d, 'W.BLK'), os.path.join(d, 'S.BLK'),
                             sc, mode, out, '', '600'], capture_output=True, text=True, env=dict(os.environ, **(env or {})))
         open(os.path.join(d, 'run%d.log' % n[0]), 'w').write(r.stdout + r.stderr)
         t = os.path.join(out, 'transcript.txt')
@@ -85,7 +85,7 @@ def main():
         # the krunched disk boots again, and a program runs
         again = os.path.join(d, 'again%d' % n[0])
         os.makedirs(again)
-        shutil.copy(os.path.join(TINYC, 'build', 'data', 'pascal.bin'), again)
+        shutil.copy(os.path.join(UCSDC, 'build', 'data', 'pascal.bin'), again)
         shutil.copy(os.path.join(out, 'VERIFY_BOOT.BLK'), os.path.join(again, 'Big_Disk.BLK'))
         tr, out, ok = run(again, 'WAIT "Command:"\nTYPE "F"\nWAIT "Filer:"\nTYPE "L"\nWAIT "?"\nTYPE "*SYSTEM.C\\r"\n'
                           'WAIT "Filer:"\nTYPE "Q"\nWAIT "Command:"\n', mode)

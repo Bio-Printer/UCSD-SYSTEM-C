@@ -16,21 +16,21 @@ FILER.E.TEXT changed so and VERSION.TEXT revision 1.14.  It is compiled with
 BIGGY's Pascal compiler (Z80 mode, the prefix on the source volume: C(ompile
 II.0.FILER).  First v1.13's II.0.FILER is compiled the same way: it must be
 BIGGY's SYSTEM.FILER up to 1.27 byte for byte (that of the reference disk,
-UCSD-TinyC's build/img/Big_Disk.BLK: so the build is the one it came from).
-Uses UCSD-TinyC's build/run_verify and UCSD-Pascal-Volumes (both beside this
-repository, or $TINYC, $VOLUMES).
+UCSD-C's build/img/Big_Disk.BLK: so the build is the one it came from).
+Uses UCSD-C's build/run_verify and UCSD-Pascal-Volumes (both beside this
+repository, or $UCSDC, $VOLUMES).
 """
 import os, subprocess, sys, tempfile, shutil
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
+UCSDC = os.environ.get('UCSDC', os.path.join(os.path.dirname(ROOT), 'ucsd-c'))
 VOLUMES = os.environ.get('VOLUMES', os.path.join(os.path.dirname(ROOT), 'UCSD-Pascal-Volumes'))
-sys.path.insert(0, os.path.join(TINYC, 'tools'))
+sys.path.insert(0, os.path.join(UCSDC, 'tools'))
 import ucsdvol
 
 SOURCE = os.path.join(VOLUMES, 'BLK_format', 'U134.4_OS_SOURCE_v1.13.BLK')
 BIGGY = os.path.join(VOLUMES, 'BLK_format', 'Big_Disk.BLK')
-REFERENCE = os.path.join(TINYC, 'build', 'img', 'Big_Disk.BLK')     # (its SYSTEM.FILER is v1.13's)
+REFERENCE = os.path.join(UCSDC, 'build', 'img', 'Big_Disk.BLK')     # (its SYSTEM.FILER is v1.13's)
 OUT_SOURCE = os.path.join(ROOT, 'build', 'U134.4_OS_SOURCE_v1.14.BLK')
 OUT_FILER = os.path.join(ROOT, 'SYSTEM.FILER')
 
@@ -114,7 +114,7 @@ def compile_filer(source, mode='z80'):
     """II.0.FILER of the source volume, compiled on BIGGY: the code file"""
     d = tempfile.mkdtemp(prefix='filer_')
     os.makedirs(os.path.join(d, 'data'))
-    shutil.copy(os.path.join(TINYC, 'build', 'data', 'pascal.bin'), os.path.join(d, 'data'))
+    shutil.copy(os.path.join(UCSDC, 'build', 'data', 'pascal.bin'), os.path.join(d, 'data'))
     shutil.copy(BIGGY, os.path.join(d, 'data', 'Big_Disk.BLK'))
     shutil.copy(source, os.path.join(d, 'SRC.BLK'))
     ucsdvol.main(['new', os.path.join(d, 'S.BLK'), 'S', '100'])
@@ -122,7 +122,7 @@ def compile_filer(source, mode='z80'):
         'WAIT "Command:"\nTYPE "F"\nWAIT "Filer:"\nTYPE "P"\nWAIT "Prefix"\nTYPE "#5:\\r"\nWAIT "Filer:"\n'
         'TYPE "Q"\nWAIT "Command:"\nTYPE "C"\nWAIT "Compile what text?"\nTYPE "II.0.FILER\\r"\n'
         'WAIT "To what codefile?"\nTYPE "FILER\\r"\nWAIT "lines"\nWAIT "Command:"\n')
-    r = subprocess.run([os.path.join(TINYC, 'build', 'run_verify'), os.path.join(d, 'data'), os.path.join(d, 'SRC.BLK'),
+    r = subprocess.run([os.path.join(UCSDC, 'build', 'run_verify'), os.path.join(d, 'data'), os.path.join(d, 'SRC.BLK'),
                         os.path.join(d, 'S.BLK'), os.path.join(d, 'c.script'), mode, os.path.join(d, 'out'), '', '1800'],
                        capture_output=True, text=True)
     if 'VERIFY SCRIPT COMPLETED' not in r.stdout:

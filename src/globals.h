@@ -5,7 +5,7 @@
    * the system programs (the Filer, the Editor, the Compiler, the Linker ...)
      were compiled with GLOBALS.TEXT: they read and write these variables at
      their word offsets in the operating system's outer frame (LOD 1,n);
-   * every Pascal program reads GFILES (its INPUT and OUTPUT), Tiny-C's library
+   * every Pascal program reads GFILES (its INPUT and OUTPUT), UCSD-C's library
      SYSCOM, PL, DKVID and SYVID (psys.h);
    * a FIB and a directory entry are passed to and from the system procedures
      by every program that does file I/O.
@@ -16,7 +16,7 @@
    A packed record fills each word from bit 0.  The operating system's
    variables are the locals of its outer block (procedure 1, lex level -1):
    the boot puts the pointer to SYSCOM into word 1 (#pragma system, see
-   Tiny-C's tc.h). */
+   UCSD-C's tc.h). */
 
 #define NIL ((void *)1)         /* the P-machine's NIL (LDCN) is 1, not 0 */
 

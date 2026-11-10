@@ -12,15 +12,15 @@ tools/ospascal.py), with this repository's SYSTEM.C as SYSTEM.PASCAL for the C o
 WORK: with a few Pascal programs, #9 an empty SPARE:.  PSYS_MODE (native or
 z80) as the other tests; SYSTEST_LAYOUT=reclaim or harvard: the native engine's
 layouts with the interpreter's memory given back (VERIFY_RECLAIM), and code in an
-I-space of its own (VERIFY_HARVARD).  Needs UCSD-TinyC (../ucsd-tinyc, or $TINYC) for the
+I-space of its own (VERIFY_HARVARD).  Needs UCSD-C (../ucsd-c, or $UCSDC) for the
 emulator's build/run_verify and its tools.
 """
 import os, re, shutil, struct, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
+UCSDC = os.environ.get('UCSDC', os.path.join(os.path.dirname(ROOT), 'ucsd-c'))
 VOLUMES = os.environ.get('VOLUMES', os.path.join(os.path.dirname(ROOT), 'UCSD-Pascal-Volumes'))
-sys.path.insert(0, os.path.join(TINYC, 'tools'))
+sys.path.insert(0, os.path.join(UCSDC, 'tools'))
 import ucsdvol
 
 HELLO = """PROGRAM HELLO;
@@ -160,7 +160,7 @@ SCENARIOS = {
     'assembler': ('TYPE "A"\nWAIT "Assemble what text?"\nTYPE "\\r"\nWAIT "Command:"\n'),
     # *SYSTEM.STARTUP on the boot disk: it runs instead of the welcome (then I(nitialize: again)
     'startup': 'TYPE "?"\nWAIT "S(hell"\nTYPE "I"\nWAIT "started up"\nWAIT "Command:"\n',
-    # S(hell: the Tiny-C shell (pexec, the OS's files from C)
+    # S(hell: the UCSD-C shell (pexec, the OS's files from C)
     'shell': ('TYPE "S"\nWAIT "> "\nTYPE "dir #5:\\r"\nWAIT "> "\nTYPE "type #5:hello.text\\r"\nWAIT "> "\n'
               'TYPE "copy #5:hello.text #9:\\r"\nWAIT "> "\nTYPE "bye\\r"\nWAIT "Command:"\n'),
     # a new NAME.BAS is a text file (1.15): written by a Pascal program and read back; the
@@ -186,7 +186,7 @@ int main(void)
 def disks(d, code, name):
     """d/data (the boot disk with SYSTEM.PASCAL := code, None: the Pascal one), d/WORK.BLK, d/SPARE.BLK"""
     os.makedirs(os.path.join(d, 'data'), exist_ok=True)
-    shutil.copy(os.path.join(TINYC, 'build', 'data', 'pascal.bin'), os.path.join(d, 'data'))
+    shutil.copy(os.path.join(UCSDC, 'build', 'data', 'pascal.bin'), os.path.join(d, 'data'))
     boot = os.path.join(d, 'data', 'Big_Disk.BLK')
     shutil.copy(os.path.join(VOLUMES, 'BLK_format', 'Big_Disk.BLK'), boot)
     v = ucsdvol.Volume(boot)
@@ -194,7 +194,7 @@ def disks(d, code, name):
         v.write('SYSTEM.PASCAL', code, 2)
     # (BIGGY's boot would boot its SYSTEM.C, whatever SYSTEM.PASCAL is: the one under test only)
     v.remove('SYSTEM.C')
-    if name == 'startup':                       # (a Tiny-C program as SYSTEM.STARTUP)
+    if name == 'startup':                       # (a UCSD-C program as SYSTEM.STARTUP)
         from tcrun import compile_c
         open(os.path.join(d, 'st.c'), 'w').write(STARTUP)
         b, c = compile_c(os.path.join(d, 'st.c'), d, z80=True)
@@ -221,7 +221,7 @@ def run(d, script, mode):
         env['VERIFY_RECLAIM'] = '1'
         if os.environ['SYSTEST_LAYOUT'] == 'harvard':
             env['VERIFY_HARVARD'] = '1'
-    r = subprocess.run([os.path.join(TINYC, 'build', 'run_verify'), os.path.join(d, 'data'),
+    r = subprocess.run([os.path.join(UCSDC, 'build', 'run_verify'), os.path.join(d, 'data'),
                         os.path.join(d, 'WORK.BLK'), os.path.join(d, 'SPARE.BLK'), sp, mode, out, '', '900'],
                        capture_output=True, text=True, env=env)
     tr = open(os.path.join(out, 'transcript.txt'), encoding='latin1').read() if os.path.exists(os.path.join(out, 'transcript.txt')) else ''

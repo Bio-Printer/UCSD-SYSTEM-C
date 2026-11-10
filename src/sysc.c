@@ -6,12 +6,12 @@
  * numbers and parameters in segment 0 (what compiled programs call: CXP
  * 0,n), the same global variables at the same places (globals.h), the same
  * segments (USERPROGRAM 1, DEBUGGER 2, PRINTERROR 3, INITIALIZE 4, GETCMD 5).
- * It is compiled by Tiny-C (#pragma system: lex level 0 procedures as the
+ * It is compiled by UCSD-C (#pragma system: lex level 0 procedures as the
  * Pascal compiler makes for the system, results two words below the
  * parameters as Pascal callers push them, the globals as the outer block's
  * locals); build.py makes SYSTEM.PASCAL of it.
  *
- * Segment 0, procedure 1 is the outer block the boot starts (Tiny-C's
+ * Segment 0, procedure 1 is the outer block the boot starts (UCSD-C's
  * startup code: it calls main).  Procedures 2..29 are the run-time support
  * compiled programs call; 30..43 what the system programs (the Filer ...)
  * call; the numbers come from the order of the definitions below -- do not

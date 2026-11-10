@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""build.py -- make SYSTEM.C (the operating system) from src/sysc.c with Tiny-C,
+"""build.py -- make SYSTEM.C (the operating system) from src/sysc.c with UCSD-C,
 and check it; SYSTEM.MICRO with the boot that chooses SYSTEM.C or SYSTEM.PASCAL
 (tools/boot.py); and the volume SYS-C: (build/SYS-C.BLK).
 
   build.py [--tc PATH]
 
-Tiny-C is UCSD-TinyC's host compiler: ../ucsd-tinyc/build/tc (built from
-tinyc/tc.c with gcc when it is not there), or $TINYC/build/tc, or --tc.  It
-needs Tiny-C's #pragma system (an operating system: SYSTEM.PASCAL's layout).
+The compiler is UCSD-C's host compiler: ../ucsd-c/build/tc (built from
+ucsdc/tc.c with gcc when it is not there), or $UCSDC/build/tc, or --tc.  It
+needs UCSD-C's #pragma system (an operating system: SYSTEM.PASCAL's layout).
 
 What compiled programs depend on is checked, and the build fails without it:
   * segment 0's procedures 2..43 have the numbers of the Pascal one's
@@ -24,13 +24,13 @@ What compiled programs depend on is checked, and the build fails without it:
 Then the sizes are compared with the Pascal SYSTEM.PASCAL when it is found
 (UCSD-Pascal-Volumes beside this repository).
 
-SYSTEM.MICRO is BIGGY's interpreter (UCSD-TinyC's build/img/Big_Disk.BLK, the
+SYSTEM.MICRO is BIGGY's interpreter (UCSD-C's build/img/Big_Disk.BLK, the
 reference disk) with the choosing boot; when the emulator's source is beside
 this repository (../ucsd-pascal_windows_emulator), its copy of the boot
 (kChoosingBoot, the addresses) must be the same.
 
 SYS-C: holds the sources (SYSC.C, SEG0.C, SEGS.C, GLOBALS.H) and MAKEFILE.TEXT
-(MAKE -f SYS-C:MAKEFILE makes SYS-C:SYSTEM.C again; TINY-C:MAKEFILE runs it), SYSTEM.C,
+(MAKE -f SYS-C:MAKEFILE makes SYS-C:SYSTEM.C again; UCSD-C:MAKEFILE runs it), SYSTEM.C,
 SYSTEM.MICRO, the boot's source BOOTC.TEXT, README.TEXT and FILES.TEXT.
 """
 import os, re, struct, subprocess, sys
@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import boot
 SRC = os.path.join(ROOT, 'src')
 OUT = os.path.join(ROOT, 'SYSTEM.C')
-TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
+UCSDC = os.environ.get('UCSDC', os.path.join(os.path.dirname(ROOT), 'ucsd-c'))
 MICRO = os.path.join(ROOT, 'SYSTEM.MICRO')
 VOLUME = os.path.join(ROOT, 'build', 'SYS-C.BLK')
 EMULATOR = os.environ.get('EMULATOR', os.path.join(os.path.dirname(ROOT), 'ucsd-pascal_windows_emulator'))
@@ -58,11 +58,11 @@ SEGMENTS = {1: ('USERPROG', 'userprogram'), 2: ('DEBUGGER', 'debugger'), 3: ('PR
 def tc_path(args):
     if '--tc' in args:
         return args[args.index('--tc') + 1]
-    tc = os.path.join(TINYC, 'build', 'tc')
-    srcs = [os.path.join(TINYC, 'tinyc', f) for f in os.listdir(os.path.join(TINYC, 'tinyc')) if f.endswith(('.c', '.h'))]
+    tc = os.path.join(UCSDC, 'build', 'tc')
+    srcs = [os.path.join(UCSDC, 'ucsdc', f) for f in os.listdir(os.path.join(UCSDC, 'ucsdc')) if f.endswith(('.c', '.h'))]
     if not os.path.exists(tc) or any(os.path.getmtime(s) > os.path.getmtime(tc) for s in srcs):
         os.makedirs(os.path.dirname(tc), exist_ok=True)
-        subprocess.check_call(['gcc', '-O1', '-w', '-o', tc, os.path.join(TINYC, 'tinyc', 'tc.c')])
+        subprocess.check_call(['gcc', '-O1', '-w', '-o', tc, os.path.join(UCSDC, 'ucsdc', 'tc.c')])
     return tc
 
 
@@ -116,10 +116,10 @@ def check_literals():
 
 def main(args):
     tc = tc_path(args)
-    env = dict(os.environ, TINYC_MAP='1')
-    r = subprocess.run([tc, '-I', os.path.join(TINYC, 'tinyc', 'include'), 'sysc.c', '-o', OUT],
+    env = dict(os.environ, UCSDC_MAP='1')
+    r = subprocess.run([tc, '-I', os.path.join(UCSDC, 'ucsdc', 'include'), 'sysc.c', '-o', OUT],
                        cwd=SRC, capture_output=True, text=True, env=env)
-    print(''.join(l + '\n' for l in r.stdout.split('\n') if l.strip() and 'Done' not in l and 'Tiny-C' not in l), end='')
+    print(''.join(l + '\n' for l in r.stdout.split('\n') if l.strip() and 'Done' not in l and 'UCSD-C' not in l), end='')
     if r.returncode != 0:
         print(r.stderr)
         return 1
@@ -166,11 +166,11 @@ def main(args):
 
 def make_micro():
     """SYSTEM.MICRO: the reference disk's, with the choosing boot"""
-    sys.path.insert(0, os.path.join(TINYC, 'tools'))
+    sys.path.insert(0, os.path.join(UCSDC, 'tools'))
     import ucsdvol
-    ref = os.path.join(TINYC, 'build', 'img', 'Big_Disk.BLK')
+    ref = os.path.join(UCSDC, 'build', 'img', 'Big_Disk.BLK')
     if not os.path.exists(ref):
-        return ['no %s (UCSD-TinyC: tools/setup.sh)' % ref]
+        return ['no %s (UCSD-C: tools/setup.sh)' % ref]
     open(MICRO, 'wb').write(boot.patch(ucsdvol.Volume(ref).read('SYSTEM.MICRO')[0]))
     code, sym, _ = boot.assemble()
     print('SYSTEM.MICRO: the boot chooses SYSTEM.C or SYSTEM.PASCAL (%d bytes at %04X)' % (len(code), boot.ORG))
@@ -206,7 +206,7 @@ def check_emulator():
 
 # SYS-C: name, source (in this repository), kind (2 code, 3 text), what
 FILES = [('README.TEXT', 'src/readme.txt', 3, 'what is on SYS-C:, how to build and install it'),
-         ('MAKEFILE.TEXT', 'src/makefile.txt', 3, 'MAKE -f SYS-C:MAKEFILE makes SYS-C:SYSTEM.C (TINY-C:MAKEFILE runs it too)'),
+         ('MAKEFILE.TEXT', 'src/makefile.txt', 3, 'MAKE -f SYS-C:MAKEFILE makes SYS-C:SYSTEM.C (UCSD-C:MAKEFILE runs it too)'),
          ('SYSC.C', 'src/sysc.c', 3, 'the operating system: the procedures\' numbers, the segments'),
          ('GLOBALS.H', 'src/globals.h', 3, 'its types and global variables, word for word as the Pascal one\'s'),
          ('SEG0.C', 'src/seg0.c', 3, 'segment 0: EXECERROR .. COMMAND, the outer block'),
@@ -218,7 +218,7 @@ FILES = [('README.TEXT', 'src/readme.txt', 3, 'what is on SYS-C:, how to build a
 
 def make_volume():
     """build/SYS-C.BLK"""
-    sys.path.insert(0, os.path.join(TINYC, 'tools'))
+    sys.path.insert(0, os.path.join(UCSDC, 'tools'))
     import ucsdvol
     os.makedirs(os.path.dirname(VOLUME), exist_ok=True)
     if os.path.exists(VOLUME):

@@ -5,7 +5,7 @@ SYSTEM.C, or SYSTEM.PASCAL when a key is typed within 2 seconds.
 On a copy of the boot disk with the choosing SYSTEM.MICRO, in P-Code mode
 (standard, Reclaim and Harvard layouts: the emulator's native boot) and in Z80
 mode (the Z80 code itself):
-  * no key: SYSTEM.C boots -- a small operating system of Tiny-C's ostest that
+  * no key: SYSTEM.C boots -- a small operating system of UCSD-C's ostest that
     says "OS mode" and halts, so it is seen to be the one that runs; then this
     repository's SYSTEM.C up to the Command: prompt;
   * a key at once (TYPENOW, with VERIFY_BOOTWAIT: the real 2 seconds): SYSTEM.PASCAL,
@@ -16,13 +16,13 @@ mode (the Z80 code itself):
 and BOOTC.TEXT (SYS-C:, the boot's source) assembled by the P-System's Z80
 Assembler is the code tools/boot.py puts into SYSTEM.MICRO, byte for byte.
 
-  boottest.py [--runner PATH]   (default: UCSD-TinyC's build/run_verify; needs emulator 2.08)
+  boottest.py [--runner PATH]   (default: UCSD-C's build/run_verify; needs emulator 2.08)
 """
 import os, re, shutil, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
-sys.path.insert(0, os.path.join(TINYC, 'tools'))
+UCSDC = os.environ.get('UCSDC', os.path.join(os.path.dirname(ROOT), 'ucsd-c'))
+sys.path.insert(0, os.path.join(UCSDC, 'tools'))
 sys.path.insert(0, HERE)
 import ucsdvol
 import boot
@@ -42,9 +42,9 @@ def tiny_os(d):
 
 
 def main(args):
-    runner = args[args.index('--runner') + 1] if '--runner' in args else os.path.join(TINYC, 'build', 'run_verify')
+    runner = args[args.index('--runner') + 1] if '--runner' in args else os.path.join(UCSDC, 'build', 'run_verify')
     d = tempfile.mkdtemp(prefix='boottest_')
-    base = os.path.join(TINYC, 'build', 'img', 'Big_Disk.BLK')
+    base = os.path.join(UCSDC, 'build', 'img', 'Big_Disk.BLK')
     v = ucsdvol.Volume(base)
     classic_micro = v.read('SYSTEM.MICRO')[0]
     micro = boot.patch(classic_micro)
@@ -55,7 +55,7 @@ def main(args):
     def disk(name, files, remove=()):
         dd = os.path.join(d, name)
         os.makedirs(dd)
-        shutil.copy(os.path.join(TINYC, 'build', 'data', 'pascal.bin'), dd)
+        shutil.copy(os.path.join(UCSDC, 'build', 'data', 'pascal.bin'), dd)
         shutil.copy(base, os.path.join(dd, 'Big_Disk.BLK'))
         vol = ucsdvol.Volume(os.path.join(dd, 'Big_Disk.BLK'))
         for f in remove:

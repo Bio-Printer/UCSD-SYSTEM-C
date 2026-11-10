@@ -4,10 +4,10 @@
 boot loads it, its segment 0 stays in memory while programs run, and every
 compiled program calls it for files, strings and the console.  This
 repository is a replacement for it written in C and compiled by
-[Tiny-C](https://github.com/Bio-Printer/UCSD-TinyC).  The two are
+[UCSD-C](https://github.com/Bio-Printer/UCSD-C).  The two are
 interchangeable: boot `SYSTEM.C` (this one) instead of `SYSTEM.PASCAL` and the
 system runs as before, with the Filer, Editor, Compiler, Linker and Assembler,
-Pascal and Tiny-C programs, the Tiny-C shell, pexec and sub-volumes.
+Pascal and UCSD-C programs, the UCSD-C shell, pexec and sub-volumes.
 
 It is a port of the U134.4 OS source, revision 1.13 (UCSD-Pascal-Volumes'
 `U134.4_OS_SOURCE_v1.13`: II.0 plus pexec, `S(hell` and `X(ecute` into
@@ -79,8 +79,8 @@ system's code saves does not show there; its frames and string constants
   `*SYSTEM.MICRO`), keep its SYSTEM.PASCAL, and boot again.  Or copy `SYSTEM.C`
   over its `SYSTEM.PASCAL` (the old boot then boots it, with no question).
 * Built on the P-System: `MAKE -f SYS-C:MAKEFILE` (the makefile
-  SYS-C:MAKEFILE.TEXT; MAKE is on Tiny-C's TOOLS:) makes SYS-C:SYSTEM.C, the
-  same as this one byte for byte; `MAKE -f TINY-C:MAKEFILE` (the compiler, the
+  SYS-C:MAKEFILE.TEXT; MAKE is on UCSD-C's TOOLS:) makes SYS-C:SYSTEM.C, the
+  same as this one byte for byte; `MAKE -f UCSD-C:MAKEFILE` (the compiler, the
   library and the tools) runs it too.
 
 ## What it keeps (what compiled programs depend on)
@@ -114,18 +114,18 @@ system's code saves does not show there; its frames and string constants
 
     python3 build.py
 
-compiles `src/sysc.c` with UCSD-TinyC's host compiler (`../ucsd-tinyc`, or
-`$TINYC`; it is built with gcc if needed) into `SYSTEM.C`, checks the
+compiles `src/sysc.c` with UCSD-C's host compiler (`../ucsd-c`, or
+`$UCSDC`; it is built with gcc if needed) into `SYSTEM.C`, checks the
 numbers, the segments, the globals and EXECERROR's frame (the build fails
 without them), and compares the sizes with the Pascal SYSTEM.PASCAL (from
 `../UCSD-Pascal-Volumes`).  It also makes `SYSTEM.MICRO` (BIGGY's interpreter with
 the choosing boot, `tools/boot.py`; its bytes are checked against the emulator's
 copy when `../ucsd-pascal_windows_emulator` is there) and the volume
 `build/SYS-C.BLK`.  `tools/psbuild.py` builds it again on the
-P-System, with Tiny-C's CC running on this operating system: the code file is
+P-System, with UCSD-C's CC running on this operating system: the code file is
 the same, byte for byte.
 
-Tiny-C's `#pragma system` (UCSD-TinyC, `tinyc/tc.h`) makes a module an
+UCSD-C's `#pragma system` (UCSD-C, `ucsdc/tc.h`) makes a module an
 operating system: its functions are lex level 0 procedures (called with CBP,
 returning with RBP, as the Pascal compiler compiles the system's), its static
 variables the outer block's locals (`LOD/STR/LDA 1,n` from the functions),
@@ -152,7 +152,7 @@ and `%`, no `>>`, no constant over 32767.
 | `tools/boottest.py` | the boot in every mode and layout |
 | `tools/filer.py`, `tools/filertest.py` | SYSTEM.FILER whose K(runch) knows the running system; its test |
 | `tools/ospascal.py` | the OS source revision 1.16 (FCLOSE writes files' times of day; 1.15: a new NAME.BAS is text) and SYSTEM.PASCAL compiled from it on the P-System |
-| `tools/suite.py` | UCSD-TinyC's tests on this operating system |
+| `tools/suite.py` | UCSD-C's tests on this operating system |
 | `tools/systest.py` | the system programs on both operating systems: the same transcripts and disks |
 | `tools/psbuild.py` | the build on the P-System |
 
@@ -164,7 +164,7 @@ its variables through a record.
 
 ## Tests
 
-* `tools/suite.py TEST ...`: UCSD-TinyC's tests (`quicktest`, `pexectest`,
+* `tools/suite.py TEST ...`: UCSD-C's tests (`quicktest`, `pexectest`,
   `keytest`, `xsubvoltest`, `selfcompile`, `alltest`, `shellalltest`, the vi
   tests, ...) with SYSTEM.C as the SYSTEM.PASCAL of their boot disks.  All 38 pass, in P-Code
   and in Z80 mode.

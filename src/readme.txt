@@ -5,7 +5,7 @@ U134.4_OS_SOURCE_v1.13 with v1.15's change (a new NAME.BAS, a BASIC
 source, is a text file) and v1.16's (a file's entry gets the time of day it
 was written, from emulator 2.13: see TIMES below), the source of BIGGY's
 SYSTEM.PASCAL.  Programs and
-the system programs (Filer, Editor, Compiler, Linker, Assembler, the Tiny-C
+the system programs (Filer, Editor, Compiler, Linker, Assembler, the UCSD-C
 shell) cannot tell the two apart: segment 0 has the same procedures with the
 same numbers, the global variables are at the same words, the segments are
 the same.  Its segment 0, which stays in memory, is 142 bytes smaller, so a
@@ -33,7 +33,7 @@ later; an older one does not wait, and boots SYSTEM.C.
 
 THE FILES
 
-  MAKEFILE.TEXT MAKE -f SYS-C:MAKEFILE makes SYSTEM.C (TINY-C:MAKEFILE too)
+  MAKEFILE.TEXT MAKE -f SYS-C:MAKEFILE makes SYSTEM.C (UCSD-C:MAKEFILE too)
   SYSC.C        the module: the procedures' numbers and the segments
   GLOBALS.H     the types and the global variables (their word offsets)
   SEG0.C        segment 0: EXECERROR .. COMMAND, the outer block
@@ -45,13 +45,13 @@ THE FILES
 
 BUILDING IT
 
-  MAKE -f SYS-C:MAKEFILE    (from the shell; TINY-C: and TOOLS: on line)
+  MAKE -f SYS-C:MAKEFILE    (from the shell; UCSD-C: and TOOLS: on line)
 
 compiles SYSC.C when it or one of the files it includes is newer than
 SYSC.OBJ (beside it) and links SYS-C:SYSTEM.C, the same as BIGGY's byte for
 byte (#pragma system lays it out as SYSTEM.PASCAL is; the dot in -L
 SYS-C:SYSTEM.C.= makes that the name exactly); MAKE -B -f SYS-C:MAKEFILE
-does both again.  MAKE -f TINY-C:MAKEFILE, which rebuilds the compiler, the
+does both again.  MAKE -f UCSD-C:MAKEFILE, which rebuilds the compiler, the
 library and the tools, builds it too.  To
 use a new one, copy it with the Filer to *SYSTEM.C (T(ransfer
 SYS-C:SYSTEM.C, *SYSTEM.C) and boot again.  Keep SYSTEM.PASCAL: a key at the

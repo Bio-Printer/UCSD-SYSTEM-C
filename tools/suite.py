@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
-"""suite.py -- run UCSD-TinyC's tests on the operating system in C.
+"""suite.py -- run UCSD-C's tests on the operating system in C.
 
-  suite.py [--pascal] TEST ... (names of UCSD-TinyC/tools/*.py, e.g. quicktest pexectest)
+  suite.py [--pascal] TEST ... (names of UCSD-C/tools/*.py, e.g. quicktest pexectest)
 
-The boot disks the tests use (UCSD-TinyC's build/BIGGY.BLK and
+The boot disks the tests use (UCSD-C's build/BIGGY.BLK and
 build/data/Big_Disk.BLK) get this repository's SYSTEM.PASCAL for the run and
 their own back afterwards (--pascal: the Pascal one, unchanged, for a
 comparison).  Each test's last line is printed, and the whole output goes to
-build/suite/TEST.log.  PSYS_MODE (native or z80) is passed on.  The TinyC
-checkout is ../ucsd-tinyc, or $TINYC.
+build/suite/TEST.log.  PSYS_MODE (native or z80) is passed on.  The UCSD-C
+checkout is ../ucsd-c, or $UCSDC.
 """
 import os, shutil, signal, subprocess, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
-sys.path.insert(0, os.path.join(TINYC, 'tools'))
+UCSDC = os.environ.get('UCSDC', os.path.join(os.path.dirname(ROOT), 'ucsd-c'))
+sys.path.insert(0, os.path.join(UCSDC, 'tools'))
 import ucsdvol
 
-DISKS = [os.path.join(TINYC, 'build', 'BIGGY.BLK'), os.path.join(TINYC, 'build', 'data', 'Big_Disk.BLK')]
+DISKS = [os.path.join(UCSDC, 'build', 'BIGGY.BLK'), os.path.join(UCSDC, 'build', 'data', 'Big_Disk.BLK')]
 
 
 BACKUP = os.path.join(ROOT, 'build', 'suite')
@@ -67,8 +67,8 @@ def main(args):
     try:
         for t in tests:
             t0 = time.time()
-            cmd = [sys.executable, os.path.join(TINYC, 'tools', t if t.endswith('.py') else t + '.py')]
-            r = subprocess.run(cmd, capture_output=True, text=True, cwd=TINYC)
+            cmd = [sys.executable, os.path.join(UCSDC, 'tools', t if t.endswith('.py') else t + '.py')]
+            r = subprocess.run(cmd, capture_output=True, text=True, cwd=UCSDC)
             out = r.stdout + r.stderr
             open(os.path.join(logs, t.replace('.py', '') + '.log'), 'w').write(out)
             lines = [l for l in out.split('\n') if l.strip()]

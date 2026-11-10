@@ -23,15 +23,15 @@ overflow).  First v1.15's SYSTEM is compiled the same way: it must be BIGGY's
 SYSTEM.PASCAL but for the bytes the compiler never sets (a block's end after a
 segment's code, the pad byte that aligns a case table), which are 0xE5 in a
 disk's copy and whatever was in memory in a compile (a block's last bytes, so
-two compiles differ there).  Uses UCSD-TinyC's build/run_verify and UCSD-Pascal-Volumes (both
-beside this repository, or $TINYC, $VOLUMES).
+two compiles differ there).  Uses UCSD-C's build/run_verify and UCSD-Pascal-Volumes (both
+beside this repository, or $UCSDC, $VOLUMES).
 """
 import os, subprocess, sys, tempfile, shutil
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import filer
-from filer import TINYC, VOLUMES, ucsdvol, text_lines, patch_text
+from filer import UCSDC, VOLUMES, ucsdvol, text_lines, patch_text
 
 SOURCE = os.path.join(VOLUMES, 'BLK_format', 'U134.4_OS_SOURCE_v1.15.BLK')
 BIGGY = os.path.join(VOLUMES, 'BLK_format', 'Big_Disk.BLK')
@@ -129,7 +129,7 @@ def compile_system(source, mode='z80'):
     """SYSTEM of the source volume, compiled on BIGGY: the code file"""
     d = tempfile.mkdtemp(prefix='ospas_')
     os.makedirs(os.path.join(d, 'data'))
-    shutil.copy(os.path.join(TINYC, 'build', 'data', 'pascal.bin'), os.path.join(d, 'data'))
+    shutil.copy(os.path.join(UCSDC, 'build', 'data', 'pascal.bin'), os.path.join(d, 'data'))
     shutil.copy(BIGGY, os.path.join(d, 'data', 'Big_Disk.BLK'))
     shutil.copy(source, os.path.join(d, 'SRC.BLK'))
     ucsdvol.main(['new', os.path.join(d, 'S.BLK'), 'S', '100'])
@@ -137,7 +137,7 @@ def compile_system(source, mode='z80'):
         'WAIT "Command:"\nTYPE "F"\nWAIT "Filer:"\nTYPE "P"\nWAIT "Prefix"\nTYPE "#5:\\r"\nWAIT "Filer:"\n'
         'TYPE "Q"\nWAIT "Command:"\nTYPE "C"\nWAIT "Compile what text?"\nTYPE "SYSTEM\\r"\n'
         'WAIT "To what codefile?"\nTYPE "OS\\r"\nWAIT "lines"\nWAIT "Command:"\n')
-    r = subprocess.run([os.path.join(TINYC, 'build', 'run_verify'), os.path.join(d, 'data'), os.path.join(d, 'SRC.BLK'),
+    r = subprocess.run([os.path.join(UCSDC, 'build', 'run_verify'), os.path.join(d, 'data'), os.path.join(d, 'SRC.BLK'),
                         os.path.join(d, 'S.BLK'), os.path.join(d, 'c.script'), mode, os.path.join(d, 'out'), '', '3600'],
                        capture_output=True, text=True)
     if 'VERIFY SCRIPT COMPLETED' not in r.stdout:

@@ -1,6 +1,6 @@
 # MAKEFILE -- the operating system in C: SYS-C:SYSTEM.C, the same as the one on
-# BIGGY byte for byte.  From the shell: MAKE -f SYS-C:MAKEFILE (TINY-C: and TOOLS:
-# on line); MAKE -f TINY-C:MAKEFILE runs it too.  SYSC.OBJ goes onto SYS-C:; MAKE -B
+# BIGGY byte for byte.  From the shell: MAKE -f SYS-C:MAKEFILE (UCSD-C: and TOOLS:
+# on line); MAKE -f UCSD-C:MAKEFILE runs it too.  SYSC.OBJ goes onto SYS-C:; MAKE -B
 # ... compiles it again.
 S = SYS-C:
 

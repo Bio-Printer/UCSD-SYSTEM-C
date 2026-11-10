@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""psbuild.py -- build the operating system ON the P-System with Tiny-C's CC,
+"""psbuild.py -- build the operating system ON the P-System with UCSD-C's CC,
 running on the operating system in C itself, and compare it with SYSTEM.C
 that build.py made on the host (the two must be the same, byte for byte, as
-Tiny-C's own builds are).
+UCSD-C's own builds are).
 
 The sources go onto the work disk (#5) as SYSC.C, SEG0.C, SEGS.C and
-GLOBALS.H (as on SYS-C:), with CC.CODE (the host's build of Tiny-C's modules),
+GLOBALS.H (as on SYS-C:), with CC.CODE (the host's build of UCSD-C's modules),
 its messages and library; then X(ecute CC, SYSC: SYSC.CODE on #5, the same as
 SYSTEM.C.  Uses
-PSYS_MODE (native or z80) and UCSD-TinyC (../ucsd-tinyc, or $TINYC).
+PSYS_MODE (native or z80) and UCSD-C (../ucsd-c, or $UCSDC).
 """
 import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-TINYC = os.environ.get('TINYC', os.path.join(os.path.dirname(ROOT), 'ucsd-tinyc'))
-sys.path.insert(0, os.path.join(TINYC, 'tools'))
+UCSDC = os.environ.get('UCSDC', os.path.join(os.path.dirname(ROOT), 'ucsd-c'))
+sys.path.insert(0, os.path.join(UCSDC, 'tools'))
 from psys import PSystem
 from selfhost import put_headers
 from buildtc import build
@@ -43,7 +43,7 @@ def main():
     finally:
         suite.restore(saved)
     lines = [l for l in tr.replace('\r', '\n').split('\n') if l.strip()]
-    i = max([k for k, l in enumerate(lines) if 'Tiny-C' in l] or [0])
+    i = max([k for k, l in enumerate(lines) if 'UCSD-C' in l] or [0])
     print('\n'.join(lines[i:]))
     try:
         got = ps.get('SYSC.CODE')
